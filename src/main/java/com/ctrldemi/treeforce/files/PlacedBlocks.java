@@ -1,4 +1,4 @@
-package com.beanfeed.treechopper.files;
+package com.ctrldemi.treeforce.files;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,11 +10,11 @@ import java.io.IOException;
 public class PlacedBlocks {
 
     private static File file;
-
     private static FileConfiguration customFile;
 
     public static void setup() {
-        file = new File(Bukkit.getServer().getPluginManager().getPlugin("TreeChopper").getDataFolder(), "PlacedBlocks.yml");
+        // Updated to use "TreeForce" data folder
+        file = new File(Bukkit.getServer().getPluginManager().getPlugin("TreeForce").getDataFolder(), "PlacedBlocks.yml");
 
         if (!file.exists()) {
             try {
@@ -23,7 +23,6 @@ public class PlacedBlocks {
                 System.out.println(e.getMessage());
             }
         }
-
         customFile = YamlConfiguration.loadConfiguration(file);
     }
 

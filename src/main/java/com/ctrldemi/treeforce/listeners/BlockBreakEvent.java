@@ -1,12 +1,15 @@
-package com.beanfeed.treechopper.listeners;
+package com.ctrldemi.treeforce.listeners;
 
 import com.google.common.collect.ImmutableList;
-import com.beanfeed.treechopper.TreeChopper;
-import com.beanfeed.treechopper.files.PlacedBlocks;
+import com.google.common.collect.ImmutableMap;
+import com.ctrldemi.treeforce.TreeForce;
+import com.ctrldemi.treeforce.files.PlacedBlocks;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -40,6 +43,26 @@ public class BlockBreakEvent implements Listener {
             Material.COPPER_PICKAXE
     );
 
+    private final ImmutableMap<Material, Material> SAPLING_MAP = ImmutableMap.<Material, Material>builder()
+            .put(Material.OAK_LOG, Material.OAK_SAPLING)
+            .put(Material.SPRUCE_LOG, Material.SPRUCE_SAPLING)
+            .put(Material.BIRCH_LOG, Material.BIRCH_SAPLING)
+            .put(Material.JUNGLE_LOG, Material.JUNGLE_SAPLING)
+            .put(Material.ACACIA_LOG, Material.ACACIA_SAPLING)
+            .put(Material.DARK_OAK_LOG, Material.DARK_OAK_SAPLING)
+            .put(Material.MANGROVE_LOG, Material.MANGROVE_PROPAGULE)
+            .put(Material.CHERRY_LOG, Material.CHERRY_SAPLING)
+            .put(Material.PALE_OAK_LOG, Material.PALE_OAK_SAPLING)
+            .put(Material.WARPED_STEM, Material.WARPED_FUNGUS)
+            .put(Material.CRIMSON_STEM, Material.CRIMSON_FUNGUS)
+            .build();
+
+    private final ImmutableList<Material> SOIL_TYPES = ImmutableList.of(
+            Material.GRASS_BLOCK, Material.DIRT, Material.COARSE_DIRT, Material.ROOTED_DIRT,
+            Material.PODZOL, Material.MOSS_BLOCK, Material.MUD, Material.MUDDY_MANGROVE_ROOTS,
+            Material.WARPED_NYLIUM, Material.CRIMSON_NYLIUM
+    );
+
     @EventHandler
     public void onBlockBreakEvent(org.bukkit.event.block.BlockBreakEvent e) {
         Player p = e.getPlayer();
@@ -57,17 +80,37 @@ public class BlockBreakEvent implements Listener {
         if (
             (
                 (
-                    AXES.contains(itemInHand.getType()) && TreeChopper.LOGS.contains(b.getType())
+                    AXES.contains(itemInHand.getType()) && TreeForce.LOGS.contains(b.getType())
                 ) || (
-                    PICKAXES.contains(itemInHand.getType()) && TreeChopper.ORES.contains(b.getType())
+                    PICKAXES.contains(itemInHand.getType()) && TreeForce.ORES.contains(b.getType())
                 )
             ) && !isPlayerPlacedBlock && p.isSneaking()
         ) {
+            Material logType = b.getType();
+            Location loc = b.getLocation().clone();
+
             this.checkNearbyBlocks(b, p, e);
 
-        } else if (isPlayerPlacedBlock && TreeChopper.LOGS.contains(b.getType())) {
+            if (SAPLING_MAP.containsKey(logType)) {
+                replantSapling(logType, loc);
+            }
+
+        } else if (isPlayerPlacedBlock && TreeForce.LOGS.contains(b.getType())) {
             PlacedBlocks.get().set(path, null);
         }
+    }
+
+    private void replantSapling(Material logType, Location loc) {
+        Material saplingType = SAPLING_MAP.get(logType);
+        
+        Bukkit.getScheduler().runTaskLater(TreeForce.getPlugin(), () -> {
+            Block targetBlock = loc.getBlock();
+            Block soil = targetBlock.getRelative(BlockFace.DOWN);
+
+            if (targetBlock.getType() == Material.AIR && SOIL_TYPES.contains(soil.getType())) {
+                targetBlock.setType(saplingType);
+            }
+        }, 2L);
     }
 
     public void checkNearbyBlocks(Block block, Player player, org.bukkit.event.block.BlockBreakEvent event) {
@@ -87,7 +130,7 @@ public class BlockBreakEvent implements Listener {
 
                     Block nearbyBlock = center.getBlock();
 
-                    if (TreeChopper.LOGS.contains(nearbyBlock.getType()) || TreeChopper.ORES.contains(nearbyBlock.getType())) {
+                    if (TreeForce.LOGS.contains(nearbyBlock.getType()) || TreeForce.ORES.contains(nearbyBlock.getType())) {
                         ItemStack tool = player.getInventory().getItemInMainHand();
 
                         nearbyBlock.breakNaturally(tool, true);
@@ -114,6 +157,8 @@ public class BlockBreakEvent implements Listener {
                             case DEEPSLATE_REDSTONE_ORE:
                                 event.setExpToDrop(rand.nextInt(1,5));
                                 break;
+                            default:
+                                break;
                         }
 
                         int xpAmount = event.getExpToDrop();
@@ -130,9 +175,6 @@ public class BlockBreakEvent implements Listener {
                                 int unbLevel = meta.getEnchantLevel(Enchantment.UNBREAKING);
                                 double chanceOfDmg = (double) 1 /(unbLevel+1);
 
-                                // Unbreaking 1 = 50% chance of taking damage
-                                // Unbreaking 2 = 33% chance of taking damage
-                                // Unbreaking 3 = 25% chance of taking damage
                                 if (rand.nextDouble() < chanceOfDmg) {
                                     dmg.setDamage(dmg.getDamage() + 1);
                                 }
@@ -150,16 +192,12 @@ public class BlockBreakEvent implements Listener {
                         }
 
                         this.checkNearbyBlocks(nearbyBlock, player, event);
-
                     }
-
                     z++;
                 }
-
                 x++;
                 z = -1;
             }
-
             y++;
             x = -1;
             z = -1;
