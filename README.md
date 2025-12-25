@@ -1,30 +1,35 @@
-# TreeChopper for Paper
+# TreeForce
 
-Forked from [TreeFella](https://hangar.papermc.io/V1ttorassi/TreeFella) 
+TreeForce is a lightweight resource gathering plugin for PaperMC. This project is a refactored fork of TreeChopper, updated to support Minecraft 1.21.10.
 
-## Changes
+## Features
 
-- Added support for chopping Pale Oak Logs
-- Ores now drop experience when vein mining
-- Added support for copper tools
+* **Tree Chopping**: Break one log with an axe while sneaking to fell the entire tree.
+* **Vein Mining**: Break one ore with a pickaxe while sneaking to mine the entire vein.
+* **Auto-Replant**: Automatically plants a matching sapling or fungus after a tree is felled.
+* **Experience Drops**: Vein-mined ores drop experience naturally.
+* **Modern Compatibility**: Supports Pale Oak, Copper tools, and Nether vegetation.
+* **Tool Protection**: Mining stops if the tool is about to break.
 
-# The Following is from the TreeFella Repository
+## Usage
 
-A simple plugin for quickly chopping down trees and ore mining!
+* **Wood**: Hold an axe and sneak while breaking a log.
+* **Ores**: Hold a pickaxe and sneak while breaking an ore block.
 
-Tested up to version 1.21.10
+## Installation
 
-# How to install
+1. Download the `TreeForce.jar` file.
+2. Move the file into your server's `plugins` folder.
+3. Restart your server.
 
-- Go to "releases" page and download the version you want by selecting the .jar file
-- Move the .jar file to the "plugins" folder in your paper server
-- Start your server
+## Building
 
-## Instructions
-While standing next to the desired tree or ore vein simply hold shift while you break the block and all adjacent blocks of that type will break instantly and the tool used will take damage according to the broken blocks. If the tool itself would break during the mining/chopping no further blocks will be broken for realistic reasons
+Compiling requires Java 21 and Maven.
 
-### Wood
-Wood chopping requires an axe to work and can chop any type of wood or nether planks
+1. Clone the repository.
+2. Run `mvn clean package` in the project root.
+3. The compiled jar will be in the `target/` directory.
 
-### Ores
-Ore mining requires a pickaxe to work and can mine any type of ore including deepslate variants and nether ores
+## Credits
+
+* **Based on**: TreeChopper by beanfeed and TreeFella by V1ttorassi.
